@@ -1,0 +1,57 @@
+{
+  "model": "resnet50",
+  "steps": [
+    {
+      "name": "last_layer",
+      "n_epochs": 10,
+      "n_trainable_layers": 2,
+      "optimizer": {
+        "type": "SGD",
+        "params": {
+          "lr": 1e-2,
+          "decay": 1e-6,
+          "momentum": 0.9,
+          "nesterov": true
+        }
+      }
+    },
+    {
+      "name": "finetune",
+      "n_epochs": 10,
+      "n_trainable_layers": 97,
+      "optimizer": {
+        "type": "SGD",
+        "params": {
+          "lr": 1e-4,
+          "decay": 1e-6,
+          "momentum": 0.9,
+          "nesterov": true
+        }
+      }
+    }
+  ],
+  "generator": {
+    "augmentation": {
+      "zoom_range": 0.1,
+      "horizontal_flip": true,
+      "vertical_flip": false,
+      "width_shift_range": 0.1,
+      "height_shift_range": 0.1,
+      "channel_shift_range": 0.1
+    },
+    "flow": {
+      "batch_size": 32,
+      "target_size": [
+        180,
+        180
+      ]
+    },
+    "flow_test": {
+      "batch_size": 128,
+      "target_size": [
+        180,
+        180
+      ]
+    }
+  }
+}
