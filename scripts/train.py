@@ -9,17 +9,19 @@ import importlib
 import json
 import logging
 import os
+import multiprocessing
 
 import numpy as np
+import pandas as pd
 from datetime import datetime
 from collections import namedtuple
 from keras import optimizers
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.models import load_model
 from keras.metrics import categorical_crossentropy
-from keras.preprocessing.image import ImageDataGenerator
 
 from cdiscount.utils.TensorBoardCallBack import TensorBoardCallBack
+from cdiscount.utils.image import ImageDataGenerator
 from cdiscount.evaluation import metrics
 from cdiscount.models.freeze import set_trainable_layers
 
@@ -145,9 +147,15 @@ def train(learning_conf, args, log_dir):
     """
     model_module = importlib.import_module("cdiscount.models." + learning_conf["model"])
     logging.info("Load dataset...")
-    train_gen, val_gen = get_images_generators(args.data,
-                                               model_module.preprocess_input,
-                                               **learning_conf["generator"])
+
+    train_gen = get_image_iterator(args.train, args.img_dir,
+                                   model_module.preprocess_input,
+                                   learning_conf["generator"]["augmentation"],
+                                   learning_conf["generator"]["flow"])
+    val_gen = get_image_iterator(args.train, args.img_dir,
+                                 model_module.preprocess_input,
+                                 {},
+                                 learning_conf["generator"]["flow_test"])
     save_category_mapping(train_gen, val_gen, log_dir)
 
     logging.info("Initialize model...")
@@ -170,18 +178,13 @@ def create_timestamped_log_dir(dst_dir):
     return timestamped_log_dir
 
 
-def get_images_generators(data_dir, preprocess , **kwargs):
-    train_gen = ImageDataGenerator(preprocessing_function=preprocess,
-                                   **kwargs["augmentation"])
-    val_gen = ImageDataGenerator(preprocessing_function=preprocess)
-
-    train_dir = os.path.join(data_dir, "train")
-    val_dir = os.path.join(data_dir, "val")
-    iter_train = train_gen.flow_from_directory(
-        directory=train_dir, **kwargs["flow"])
-    iter_val = val_gen.flow_from_directory(
-        directory=val_dir, **kwargs["flow_test"])
-    return iter_train, iter_val
+def get_image_iterator(dataset_fn, img_dir, preprocess, augmentation, flow):
+    dataset = pd.read_feather(dataset_fn)
+    pool = multiprocessing.Pool()
+    imgen = ImageDataGenerator(preprocessing_function=preprocess,
+                               pool=pool, **augmentation)
+    iter_im = imgen.flow_from_dataset(dataset, img_dir, **flow)
+    return iter_im
 
 
 def load_configuration(conf_filename):
@@ -191,7 +194,8 @@ def load_configuration(conf_filename):
 
 
 def save_full_configuration(args, log_dir, conf):
-    conf["data"] = args.data
+    conf["train"] = args.train
+    conf["val"] = args.val
     conf_filename = os.path.join(log_dir, "conf.json")
     with open(conf_filename, "w") as out_conf_file:
         json.dump(conf, out_conf_file, indent=2)
@@ -215,9 +219,10 @@ if __name__ == "__main__":
                              'The script will create a subdir with the current date.')
     parser.add_argument('--conf', type=str,
                         help="Path to the configuration file.")
-    parser.add_argument('--data', type=str,
-                        help="Path to the images data."
-                             " Must contains train and val directories.")
+    parser.add_argument('--train', type=str,
+                        help="Path to the train dataset.")
+    parser.add_argument('--val', type=str,
+                        help="Path to the validation dataset.")
     parser.add_argument('--checkpoint', type=str, default="",
                         help="Checkpoint to use to resume training.")
     parser.add_argument('--epoch', type=int, default=0,

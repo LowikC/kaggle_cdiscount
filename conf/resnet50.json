@@ -37,7 +37,8 @@
       "vertical_flip": false,
       "width_shift_range": 0.1,
       "height_shift_range": 0.1,
-      "channel_shift_range": 0.1
+      "channel_shift_range": 0.1,
+      "cval": 255
     },
     "flow": {
       "batch_size": 32,
