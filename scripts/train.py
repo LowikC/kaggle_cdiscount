@@ -103,10 +103,10 @@ def train_step(model, train_gen, val_gen, step, state, logdir):
     callbacks = get_callbacks(os.path.join(logdir, step["name"]))
     history = model.fit_generator(
         train_gen,
-        steps_per_epoch=int(np.ceil(train_gen.samples / train_gen.batch_size)),
+        steps_per_epoch=int(np.ceil(train_gen.nb_sample / train_gen.batch_size)),
         epochs=step["n_epochs"],
         validation_data=val_gen,
-        validation_steps=int(np.ceil(val_gen.samples / val_gen.batch_size)),
+        validation_steps=int(np.ceil(val_gen.nb_sample / val_gen.batch_size)),
         callbacks=callbacks,
         max_queue_size=10,
         workers=1,
@@ -160,7 +160,7 @@ def train(learning_conf, args, log_dir):
     save_category_mapping(train_gen, val_gen, log_dir)
 
     logging.info("Initialize model...")
-    model, state = init_model(args, model_module, train_gen.num_class,
+    model, state = init_model(args, model_module, train_gen.nb_class,
                               learning_conf.get("model_params", {}))
 
     for step in learning_conf["steps"][state.initial_step:]:
