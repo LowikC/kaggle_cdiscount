@@ -220,6 +220,8 @@ if __name__ == "__main__":
                              'The script will create a subdir with the current date.')
     parser.add_argument('--conf', type=str,
                         help="Path to the configuration file.")
+    parser.add_argument('--imgdir', type=str,
+                        help='Path to the directory containing images.')
     parser.add_argument('--train', type=str,
                         help="Path to the train dataset.")
     parser.add_argument('--val', type=str,
