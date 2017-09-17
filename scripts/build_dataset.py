@@ -56,10 +56,10 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(
         description='Create train and val datasets.')
-    parser.add_argument('--data_dir', type=str,
-                        help="Path to the data.")
+    parser.add_argument('--dataset', type=str,
+                        help="Path to the dataset.")
     parser.add_argument('--out_dir', type=str,
-                        help="Path to the data.")
+                        help="Path to the output dir.")
     parser.add_argument('--min_samples', type=int,
                         default=10,
                         help="Minimum number of samples in a class."
