@@ -204,7 +204,7 @@ def save_full_configuration(args, log_dir, conf):
 
 
 def setup_training(args):
-    log_dir = create_timestamped_log_dir(args.logdir)
+    log_dir = create_timestamped_log_dir(args.log_dir)
     conf = load_configuration(args.conf)
 
     save_full_configuration(args, log_dir, conf)
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(
         description='Finetune Pre-trained model using Keras')
-    parser.add_argument('--logdir', type=str,
+    parser.add_argument('--log_dir', type=str,
                         help='Path to the directory containing logs and checkpoints.'
                              'The script will create a subdir with the current date.')
     parser.add_argument('--conf', type=str,
