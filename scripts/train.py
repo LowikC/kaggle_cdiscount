@@ -109,7 +109,7 @@ def train_step(model, train_gen, val_gen, step, state, logdir):
         validation_steps=int(np.ceil(val_gen.samples / val_gen.batch_size)),
         callbacks=callbacks,
         max_queue_size=10,
-        workers=6,
+        workers=1,
         initial_epoch=state.initial_epoch,
         verbose=1)
     logging.info("Finished step {}!".format(step['name']))
@@ -123,17 +123,18 @@ def save_category_mapping(train_gen, val_gen, log_dir):
     :param log_dir: Path to save the file.
     :return:
     """
-    class_id_to_category_id = {int(class_id): int(cat_id) for (cat_id, class_id) in
-                               train_gen.category_id_to_class_id.items()}
-    val_class_id_to_category_id = {int(class_id): int(cat_id) for (cat_id, class_id)
-                               in
-                                   val_gen.category_id_to_class_id.items()}
-    if class_id_to_category_id != val_class_id_to_category_id:
+    train_class_id_to_category_id = {int(class_id): int(cat_id)
+                                     for (cat_id, class_id)
+                                     in train_gen.class_indices.items()}
+    val_class_id_to_category_id = {int(class_id): int(cat_id)
+                                   for (cat_id, class_id)
+                                   in val_gen.class_indices.items()}
+    if train_class_id_to_category_id != val_class_id_to_category_id:
         raise Exception("Error, the train and val mapping are different")
 
     mapping_filename = os.path.join(log_dir, "class_id_to_category_id.json")
     with open(mapping_filename, "w") as mfile:
-        json.dump(class_id_to_category_id, mfile, indent=2)
+        json.dump(train_class_id_to_category_id, mfile, indent=2)
     logging.info("Saved the mapping class id to category in {}"
                  .format(mapping_filename))
 

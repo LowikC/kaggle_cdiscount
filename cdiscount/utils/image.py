@@ -757,6 +757,7 @@ class Iterator(object):
             if self.batch_index == 0:
                 index_array = np.arange(n)
                 if shuffle:
+                    print("Shuffle")
                     index_array = np.random.permutation(n)
 
             current_index = (self.batch_index * batch_size) % n
@@ -1081,6 +1082,8 @@ class DatasetIterator(Iterator):
         # second, build an index of the images in the different class subfolders
         self.filenames = list(dataset["path"])
         self.classes = np.zeros((self.nb_sample,), dtype='int32')
+        for i, cid in enumerate(list(dataset["category_id"])):
+            self.classes[i] = self.class_indices[cid]
         super(DatasetIterator, self).__init__(self.nb_sample, batch_size, shuffle, seed)
 
     def next(self):
