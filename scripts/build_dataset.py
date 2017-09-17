@@ -46,6 +46,7 @@ def main(args):
                                 .format(args.min_samples, args.max_samples,
                                         1 - args.train_ratio, args.seed))
 
+    os.makedirs(args.out_dir, exist_ok=True)
     train.to_feather(train_filename)
     val.to_feather(val_filename)
 
@@ -59,6 +60,8 @@ if __name__ == "__main__":
         description='Create train and val datasets.')
     parser.add_argument('--dataset', type=str,
                         help="Path to the dataset.")
+    parser.add_argument('--img_dir', type=str,
+                        help="Path to the raw images directory.")
     parser.add_argument('--out_dir', type=str,
                         help="Path to the output dir.")
     parser.add_argument('--min_samples', type=int,
