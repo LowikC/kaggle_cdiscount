@@ -12,7 +12,7 @@ from cdiscount.utils.sampling import stratified_split, sample
 
 def create_item_symlink(x, img_dir, out_dir):
     pid, iid, cid = x["product_id"], x["image_id"], x["category_id"]
-    cid_dir = os.path.join(img_dir, str(cid))
+    cid_dir = os.path.join(out_dir, str(cid))
     if not os.path.isdir(cid_dir):
         os.makedirs(cid_dir)
     img_name = "{}_{}.jpg".format(pid, iid)
