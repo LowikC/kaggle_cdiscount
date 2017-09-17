@@ -34,16 +34,17 @@ def create_symlinks(img_dir, out_dir, train, val):
 
 def main(args):
     dataset = pd.read_feather(args.dataset)
-    sampled = sample(dataset, min_samples_per_class=args.min_samples,
-                     max_samples_per_class=args.max_samples, seed=42)
+    sampled, sampling_factor_per_class =\
+        sample(dataset, min_samples_per_class=args.min_samples,
+               max_samples_per_class=args.max_samples, seed=args.seed)
     train, val = stratified_split(sampled, ratio=args.train_ratio)
 
     train_filename = os.path.join(args.out_dir, "train_{}_{}_{:.2f}_{}.feather"
                                   .format(args.min_samples, args.max_samples,
-                                          args.train_ratio, 42))
+                                          args.train_ratio, args.seed))
     val_filename = os.path.join(args.out_dir, "val_{}_{}_{:.2f}_{}.feather"
                                 .format(args.min_samples, args.max_samples,
-                                        1 - args.train_ratio, 42))
+                                        1 - args.train_ratio, args.seed))
 
     train.to_feather(train_filename)
     val.to_feather(val_filename)
@@ -74,5 +75,8 @@ if __name__ == "__main__":
                         help="Proportion of the kept samples in the train set.")
     parser.add_argument('--symlinks', action='store_true',
                         help="Create symlink to all images in train and val.")
+    parser.add_argument('--seed', type=int,
+                        default=42,
+                        help="Seed for sampling")
     main_args = parser.parse_args()
     main(main_args)
